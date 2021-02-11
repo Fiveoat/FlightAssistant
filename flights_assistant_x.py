@@ -1,6 +1,5 @@
 import requests
 from currency_converter import CurrencyConverter
-from pprint import pprint
 import pandas
 
 
@@ -20,6 +19,15 @@ class FlightAssistantX:
                              headers={"Content-Type": "application/x-www-form-urlencoded"},
                              data={'grant_type': 'client_credentials', 'client_id': self.env['AMADEUS_ID'],
                                    'client_secret': self.env['AMADEUS_SECRET']}).json()['access_token']
+
+    @staticmethod
+    def get_airports(country, size='large'):
+        airports = pandas.read_csv('airports.csv')
+        airports = airports[airports['type'] == size + '_airport']
+        airports = airports[airports['iso_country'] == country]
+        if country == 'US':
+            return [x.lstrip("K") for x in airports['code'].tolist()]
+        return airports['code'].tolist()
 
     def get_quotes(self, source, destination, date, return_date, num_passengers=1, max_results=5):
         self.base_url += 'v2/shopping/flight-offers?'
@@ -49,4 +57,5 @@ class FlightAssistantX:
 
 if __name__ == '__main__':
     assistant = FlightAssistantX()
-    print(assistant.get_cheapest_flight('SLC', 'JFK', '2021-02-19', '2021-04-20', max_results=200, num_passengers=2))
+    print(assistant.get_airports('US'))
+    # print(assistant.get_cheapest_flight('SLC', 'JFK', '2021-02-19', '2021-04-20', max_results=200, num_passengers=2))
