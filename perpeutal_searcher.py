@@ -62,7 +62,8 @@ class PerpetualSearcher:
         if ideal_price > quote:
             if alert:
                 self.send_email(f'Price Notification For {destination}',
-                                f'{destination} : ${quote} : Set ${ideal_price}')
+                                f'{destination} : ${quote} : Set ${ideal_price} : '
+                                f'Depart {departure_date} : Return {return_date}')
         return quote
 
 
