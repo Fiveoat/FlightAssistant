@@ -47,8 +47,7 @@ class PerpetualSearcher:
             if alert:
                 self.send_email(f'Price Notification For {destination}',
                                 f'{destination} : ${quote} : Set ${ideal_price}')
-            return quote
-        return False
+        return quote
 
 
 if __name__ == '__main__':
