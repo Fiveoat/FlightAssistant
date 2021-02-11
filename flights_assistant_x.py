@@ -13,7 +13,7 @@ class FlightAssistantX:
     def __init__(self):
         self.env = get_env_variables()
         self.token = self.get_token()
-        self.url = 'https://test.api.amadeus.com/'
+        self.base_url = 'https://test.api.amadeus.com/'
 
     def get_token(self):
         return requests.post("https://test.api.amadeus.com/v1/security/oauth2/token",
@@ -22,24 +22,23 @@ class FlightAssistantX:
                                    'client_secret': self.env['AMADEUS_SECRET']}).json()['access_token']
 
     def get_quotes(self, source, destination, date, return_date, num_passengers=1, max_results=5):
-        self.url += 'v2/shopping/flight-offers?'
-        self.url += 'originLocationCode=' + source
-        self.url += '&destinationLocationCode=' + destination
-        self.url += '&departureDate=' + date
-        self.url += '&returnDate=' + return_date
-        self.url += f'&adults={num_passengers}'
-        self.url += f'&max={max_results}'
-        return requests.get(self.url, headers={'Authorization': f'Bearer {self.token}'}).json()['data']
+        self.base_url += 'v2/shopping/flight-offers?'
+        self.base_url += 'originLocationCode=' + source
+        self.base_url += '&destinationLocationCode=' + destination
+        self.base_url += '&departureDate=' + date
+        self.base_url += '&returnDate=' + return_date
+        self.base_url += f'&adults={num_passengers}'
+        self.base_url += f'&max={max_results}'
+        return requests.get(self.base_url, headers={'Authorization': f'Bearer {self.token}'}).json()['data']
 
     def get_flight_data(self, source, destination, date, return_date, num_passengers=1, max_results=5):
         flights = []
         converter = CurrencyConverter()
         for quote in self.get_quotes(source, destination, date, return_date, num_passengers=num_passengers,
                                      max_results=max_results):
-            flight = {'source': source, 'destination': destination,
-                      'price': converter.convert(quote['price']['base'], 'EUR', 'USD'),
-                      'carrier': quote['validatingAirlineCodes'][0]}
-            flights.append(flight)
+            flights.append({'source': source, 'destination': destination,
+                            'price': converter.convert(quote['price']['base'], 'EUR', 'USD'),
+                            'carrier': quote['validatingAirlineCodes'][0]})
         return pandas.DataFrame(flights).sort_values('price')
 
     def get_cheapest_flight(self, source, destination, date, return_date, num_passengers=1, max_results=5):
@@ -50,4 +49,4 @@ class FlightAssistantX:
 
 if __name__ == '__main__':
     assistant = FlightAssistantX()
-    print(assistant.get_cheapest_flight('SLC', 'HNL', '2021-02-11', '2021-02-12', max_results=100))
+    print(assistant.get_cheapest_flight('SLC', 'JFK', '2021-02-19', '2021-04-20', max_results=200, num_passengers=2))
