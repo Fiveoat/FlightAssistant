@@ -57,5 +57,4 @@ class FlightAssistantX:
 
 if __name__ == '__main__':
     assistant = FlightAssistantX()
-    print(assistant.get_airports('US'))
-    # print(assistant.get_cheapest_flight('SLC', 'JFK', '2021-02-19', '2021-04-20', max_results=200, num_passengers=2))
+    print(assistant.get_cheapest_flight('SLC', 'JFK', '2021-02-19', '2021-04-20', max_results=200, num_passengers=2))
