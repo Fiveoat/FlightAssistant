@@ -75,7 +75,7 @@ class PerpetualSearcher:
         try:
             data = self.assistant.get_cheapest_flight(source, destination, departure_date, return_date)
             quote = data['price']
-        except TypeError:
+        except (TypeError, KeyError):
             return None
         if ideal_price > quote:
             if alert:
@@ -86,14 +86,17 @@ class PerpetualSearcher:
 
     def run_scheduled_searches(self):
         for flight in self.database_handler.get_all_scheduled():
-            self.run_search(flight.destination, flight.ideal_price, flight.departure_date, flight.return_date,
-                            flight.source, flight.trip_length)
+            print(self.run_search(flight.destination, flight.ideal_price, flight.departure_date, flight.return_date,
+                                  flight.source, flight.trip_length), flight.destination)
 
 
 if __name__ == '__main__':
     perpetual = PerpetualSearcher()
+    # x = ['LCY', 'GVA', 'CDG', 'OSL', 'HND', 'CTS', 'KEF']
+    # for y in x:
+    #     perpetual.schedule_search(y, 500, '2021-07-12')
     perpetual.run_scheduled_searches()
-    # perpetual.schedule_search('JFK', 250, '2021-09-12')
+    # perpetual.schedule_search('YVR', 250, '2021-09-12')
     # perpetual.schedule_search('DEN', 250, '2021-09-12')
     # perpetual.schedule_search('PDX', 80, '2021-09-12')
     # print(perpetual.run_search('LAX', 420))
