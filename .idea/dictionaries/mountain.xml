@@ -4,6 +4,8 @@
       <w>apiservices</w>
       <w>browsequotes</w>
       <w>dataframe</w>
+      <w>gmail</w>
+      <w>smtp</w>
     </words>
   </dictionary>
 </component>

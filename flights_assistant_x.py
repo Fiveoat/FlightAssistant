@@ -11,8 +11,8 @@ def get_env_variables():
 class FlightAssistantX:
     def __init__(self):
         self.env = get_env_variables()
-        self.token = self.get_token()
         self.base_url = 'https://test.api.amadeus.com/'
+        self.token = self.get_token()
 
     def get_token(self):
         return requests.post("https://test.api.amadeus.com/v1/security/oauth2/token",
@@ -30,20 +30,27 @@ class FlightAssistantX:
         return airports['code'].tolist()
 
     def get_quotes(self, source, destination, date, return_date, num_passengers=1, max_results=5):
-        self.base_url += 'v2/shopping/flight-offers?'
-        self.base_url += 'originLocationCode=' + source
-        self.base_url += '&destinationLocationCode=' + destination
-        self.base_url += '&departureDate=' + date
-        self.base_url += '&returnDate=' + return_date
-        self.base_url += f'&adults={num_passengers}'
-        self.base_url += f'&max={max_results}'
-        return requests.get(self.base_url, headers={'Authorization': f'Bearer {self.token}'}).json()['data']
+        url = self.base_url
+        url += 'v2/shopping/flight-offers?'
+        url += 'originLocationCode=' + source
+        url += '&destinationLocationCode=' + destination
+        url += '&departureDate=' + date
+        url += '&returnDate=' + return_date
+        url += f'&adults={num_passengers}'
+        url += f'&max={max_results}'
+        try:
+            return requests.get(url, headers={'Authorization': f'Bearer {self.token}'}).json()['data']
+        except KeyError:
+            return None
 
     def get_flight_data(self, source, destination, date, return_date, num_passengers=1, max_results=5):
         flights = []
         converter = CurrencyConverter()
-        for quote in self.get_quotes(source, destination, date, return_date, num_passengers=num_passengers,
-                                     max_results=max_results):
+        data = self.get_quotes(source, destination, date, return_date, num_passengers=num_passengers,
+                               max_results=max_results)
+        if data is None:
+            return None
+        for quote in data:
             flights.append({'source': source, 'destination': destination,
                             'price': round(converter.convert(quote['price']['base'], 'EUR', 'USD'), 2),
                             'carrier': quote['validatingAirlineCodes'][0]})
@@ -52,7 +59,10 @@ class FlightAssistantX:
     def get_cheapest_flight(self, source, destination, date, return_date, num_passengers=1, max_results=5):
         data = self.get_flight_data(source, destination, date, return_date, num_passengers=num_passengers,
                                     max_results=max_results)
-        return data[data['price'] == data["price"].min()].iloc[0]
+        try:
+            return data[data['price'] == data["price"].min()].iloc[0]
+        except TypeError:
+            return None
 
 
 if __name__ == '__main__':
