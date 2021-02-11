@@ -45,7 +45,7 @@ class FlightAssistantX:
         for quote in self.get_quotes(source, destination, date, return_date, num_passengers=num_passengers,
                                      max_results=max_results):
             flights.append({'source': source, 'destination': destination,
-                            'price': converter.convert(quote['price']['base'], 'EUR', 'USD'),
+                            'price': round(converter.convert(quote['price']['base'], 'EUR', 'USD'), 2),
                             'carrier': quote['validatingAirlineCodes'][0]})
         return pandas.DataFrame(flights).sort_values('price')
 
