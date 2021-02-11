@@ -1,2 +1,5 @@
 source,destination,ideal_price,trip_length,departure_date,return_date
 SLC,JFK,250,14,2021-09-12,2021-09-26
+SLC,JFK,250,14,2021-09-12,2021-09-26
+SLC,DEN,250,14,2021-09-12,2021-09-26
+SLC,PDX,80,14,2021-09-12,2021-09-26
