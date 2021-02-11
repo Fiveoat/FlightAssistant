@@ -1,4 +1,5 @@
 from flights_assistant_x import FlightAssistantX
+from schema import DatabaseHandler, Flights
 import datetime
 import pandas
 import smtplib
@@ -12,6 +13,7 @@ def get_env_variables():
 class PerpetualSearcher:
     def __init__(self):
         self.assistant = FlightAssistantX()
+        self.database_handler = DatabaseHandler()
         self.env = get_env_variables()
 
     @staticmethod
@@ -54,15 +56,15 @@ class PerpetualSearcher:
 
     def schedule_search(self, destination, ideal_price, departure_date=None, return_date=None, source='SLC',
                         trip_length=14):
-        dataframe = pandas.read_csv('scheduled.csv')
         departure_date, return_date = self.determine_dates(departure_date, return_date, trip_length)
-        if departure_date is not False:
-            dataframe = dataframe.append(
-                pandas.DataFrame([[source, destination, ideal_price, trip_length, departure_date, return_date]],
-                                 columns=dataframe.columns))
-            dataframe.to_csv('scheduled.csv', index=False)
-        else:
-            print('DATE BORKED')
+        flight = Flights()
+        flight.departure_date = departure_date
+        flight.return_date = return_date
+        flight.source = source
+        flight.destination = destination
+        flight.ideal_price = ideal_price
+        flight.trip_length = trip_length
+        self.database_handler.insert(flight)
 
     def run_search(self, destination, ideal_price, departure_date=None, return_date=None, source='SLC',
                    trip_length=14, alert=True):
@@ -83,12 +85,9 @@ class PerpetualSearcher:
         return quote
 
     def run_scheduled_searches(self):
-        dataframe = pandas.read_csv('scheduled.csv')
-        for _, scheduled in dataframe.iterrows():
-            print(scheduled['destination'], scheduled['ideal_price'], scheduled['source'], scheduled['trip_length'],
-                  scheduled['departure_date'], scheduled['return_date'])
-            print(self.run_search(scheduled['destination'], scheduled['ideal_price'], scheduled['departure_date'],
-                                  scheduled['return_date'], scheduled['source'], scheduled['trip_length']))
+        for flight in self.database_handler.get_all_scheduled():
+            self.run_search(flight.destination, flight.ideal_price, flight.departure_date, flight.return_date,
+                            flight.source, flight.trip_length)
 
 
 if __name__ == '__main__':

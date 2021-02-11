@@ -1,0 +1,50 @@
+from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+Base = declarative_base()
+
+
+class Flights(Base):
+    __tablename__ = 'flights'
+    flight_id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
+    source = Column(String)
+    destination = Column(String)
+    ideal_price = Column(Integer)
+    trip_length = Column(String)
+    departure_date = Column(String)
+    return_date = Column(String)
+
+
+class DatabaseHandler:
+    def __init__(self):
+        self.engine = create_engine('sqlite:///data.sqlite')
+        self.session = sessionmaker(bind=self.engine)()
+
+    def _create_database(self):
+        Base.metadata.create_all(bind=self.engine)
+
+    def query(self, sql_statement):
+        return [x for x in self.engine.execute(sql_statement)]
+
+    def commit(self, sql_statement):
+        try:
+            self.engine.execute(sql_statement)
+            self.session.commit()
+            return True
+        except Exception:
+            return False
+
+    def insert(self, data):
+        self.session.add(data)
+        self.session.commit()
+
+    def get_all_scheduled(self, destination=None):
+        if destination is None:
+            return [x for x in self.session.query(Flights)]
+        return [x for x in self.session.query(Flights).filter_by(destination=destination)]
+
+
+if __name__ == '__main__':
+    database = DatabaseHandler()
