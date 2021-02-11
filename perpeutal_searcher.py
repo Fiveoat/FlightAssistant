@@ -22,24 +22,40 @@ class PerpetualSearcher:
         con.sendmail('fiveoat@gmail.com', 'fiveoat@gmail.com', f'Subject: {subject} \n\n{message}')
         con.quit()
 
-    @staticmethod
-    def schedule_search(destination, ideal_price, source='SLC', trip_length=14):
+    def schedule_search(self, destination, ideal_price, departure_date=None, return_date=None, source='SLC',
+                        trip_length=14):
+        # DATE IN THIS FORMAT 2021-09-12
         dataframe = pandas.read_csv('scheduled.csv')
-        dataframe = dataframe.append(pandas.DataFrame([[source, destination, ideal_price, trip_length]],
-                                                      columns=dataframe.columns))
+        departure_date, return_date = self.determine_dates(departure_date, return_date, trip_length)
+        dataframe = dataframe.append(
+            pandas.DataFrame([[source, destination, ideal_price, trip_length, departure_date, return_date]],
+                             columns=dataframe.columns))
         dataframe.to_csv('scheduled.csv', index=False)
 
     def run_scheduled_searches(self):
         dataframe = pandas.read_csv('scheduled.csv')
         for _, scheduled in dataframe.iterrows():
-            print(self.run_search(scheduled['destination'], scheduled['ideal_price'], scheduled['source'],
-                                  scheduled['trip_length']))
+            print(scheduled['destination'], scheduled['ideal_price'], scheduled['source'], scheduled['trip_length'],
+                  scheduled['departure_date'], scheduled['return_date'])
+            print(self.run_search(scheduled['destination'], scheduled['ideal_price'], scheduled['departure_date'],
+                                  scheduled['return_date'], scheduled['source'], scheduled['trip_length']))
 
-    def run_search(self, destination, ideal_price, source='SLC', trip_length=14, alert=True):
-        start = (datetime.datetime.today() + datetime.timedelta(days=1))
-        return_date = str(start + datetime.timedelta(days=trip_length)).split(" ")[0]
+    @staticmethod
+    def determine_dates(departure_date, return_date, trip_length):
+        if departure_date is None:
+            departure_date = (datetime.datetime.today() + datetime.timedelta(days=1))
+        else:
+            departure_date = datetime.datetime.strptime(departure_date, "%Y-%m-%d")
+        if return_date is None:
+            return_date = str(departure_date + datetime.timedelta(days=trip_length)).split(" ")[0]
+        departure_date = str(departure_date).split(" ")[0]
+        return departure_date, return_date
+
+    def run_search(self, destination, ideal_price, departure_date=None, return_date=None, source='SLC',
+                   trip_length=14, alert=True):
+        departure_date, return_date = self.determine_dates(departure_date, return_date, trip_length)
         try:
-            quote = self.assistant.get_cheapest_flight(source, destination, str(start).split(" ")[0], return_date)[
+            quote = self.assistant.get_cheapest_flight(source, destination, departure_date, return_date)[
                 'price']
         except TypeError:
             return None
@@ -53,5 +69,5 @@ class PerpetualSearcher:
 if __name__ == '__main__':
     perpetual = PerpetualSearcher()
     perpetual.run_scheduled_searches()
-    # perpetual.schedule_search('JFK', 250)
+    # perpetual.schedule_search('JFK', 250, '2021-09-12')
     # print(perpetual.run_search('LAX', 420))
