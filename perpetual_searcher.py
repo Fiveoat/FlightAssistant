@@ -1,7 +1,6 @@
 from flights_assistant_x import FlightAssistantX
 from schema import DatabaseHandler, Flights
 import datetime
-import pandas
 import smtplib
 
 
@@ -16,15 +15,9 @@ class PerpetualSearcher:
         self.database_handler = DatabaseHandler()
         self.env = get_env_variables()
 
-    @staticmethod
-    def remove_scheduled(destination, ideal_price, departure_date, return_date, source):
-        dataframe = pandas.read_csv('scheduled.csv')
-        dataframe = dataframe[(dataframe['destination'] != destination)
-                              & (dataframe['ideal_price'] != ideal_price) &
-                              (dataframe['departure_date'] != departure_date) &
-                              (dataframe['return_date'] != return_date) &
-                              (dataframe['source'] != source)]
-        dataframe.to_csv('scheduled.csv', index=False)
+    def remove_scheduled(self, destination, ideal_price, departure_date, return_date, source):
+        flight = self.database_handler.get_flight(destination, source, ideal_price, departure_date, return_date)
+        self.database_handler.delete(flight)
 
     @staticmethod
     def depart_day_passed(departure_date):

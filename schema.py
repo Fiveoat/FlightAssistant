@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -36,14 +36,23 @@ class DatabaseHandler:
         except Exception:
             return False
 
-    def insert(self, data):
-        self.session.add(data)
+    def insert(self, flight):
+        self.session.add(flight)
+        self.session.commit()
+
+    def delete(self, flight):
+        self.session.delete(flight)
         self.session.commit()
 
     def get_all_scheduled(self, destination=None):
         if destination is None:
             return [x for x in self.session.query(Flights)]
         return [x for x in self.session.query(Flights).filter_by(destination=destination)]
+
+    def get_flight(self, destination, source, ideal_price, departure_date, return_date):
+        return [x for x in self.session.query(Flights).filter_by(destination=destination, source=source,
+                                                                 ideal_price=ideal_price, departure_date=departure_date,
+                                                                 return_date=return_date)][0]
 
 
 if __name__ == '__main__':
