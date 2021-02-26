@@ -85,11 +85,5 @@ class PerpetualSearcher:
 
 if __name__ == '__main__':
     perpetual = PerpetualSearcher()
-    # x = ['LCY', 'GVA', 'CDG', 'OSL', 'HND', 'CTS', 'KEF']
-    # for y in x:
-    #     perpetual.schedule_search(y, 500, '2021-07-12')
+    perpetual.schedule_search('HNL', 600, departure_date='2021-09-19', return_date='2021-09-25')
     perpetual.run_scheduled_searches()
-    # perpetual.schedule_search('YVR', 250, '2021-09-12')
-    # perpetual.schedule_search('DEN', 250, '2021-09-12')
-    # perpetual.schedule_search('PDX', 80, '2021-09-12')
-    # print(perpetual.run_search('LAX', 420))

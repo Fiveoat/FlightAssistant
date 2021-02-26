@@ -39,7 +39,9 @@ class FlightAssistantX:
         url += f'&adults={num_passengers}'
         url += f'&max={max_results}'
         try:
-            return requests.get(url, headers={'Authorization': f'Bearer {self.token}'}).json()['data']
+            x = requests.get(url, headers={'Authorization': f'Bearer {self.token}'}).json()['data']
+            print(x)
+            return x
         except KeyError:
             return None
 
@@ -67,4 +69,4 @@ class FlightAssistantX:
 
 if __name__ == '__main__':
     assistant = FlightAssistantX()
-    print(assistant.get_flight_data('SLC', 'JFK', '2021-02-19', '2021-04-20', max_results=200, num_passengers=2))
+    print(assistant.get_flight_data('SLC', 'HNL', '2021-02-19', '2021-04-20', max_results=200, num_passengers=2))
